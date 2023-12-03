@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/regionAll"
+        android:title="All" />
+    <item
+        android:id="@+id/regionAmerica"
+        android:title="America" />
+    <item
+        android:id="@+id/regionEurope"
+        android:title="Europe" />
+    <item
+        android:id="@+id/regionAfrica"
+        android:title="Africa" />
+    <item
+        android:id="@+id/regionAsia"
+        android:title="Asia" />
+    <!-- Add more items for additional options -->
+</menu>
