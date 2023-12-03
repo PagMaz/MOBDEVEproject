@@ -54,6 +54,18 @@ public class DBManager {
 //        return i;
 //    }
 
+    public boolean isUsernameExists(String username) {
+        Cursor cursor = database.rawQuery(
+                "SELECT 1 FROM "
+                        + DatabaseHelper.TABLE_NAME
+                        + " WHERE "
+                        + DatabaseHelper.USERNAME
+                        + " = ?", new String[]{username});
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        return exists;
+    }
+
     public void delete(long _id) {
         database.delete(DatabaseHelper.TABLE_NAME, DatabaseHelper._ID + "=" + _id, null);
     }

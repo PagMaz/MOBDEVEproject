@@ -26,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Creating table query
     private static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " ("
             + _ID      + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + USERNAME + " TEXT NOT NULL, "
+            + USERNAME + " TEXT NOT NULL UNIQUE, "
             + PASSWORD + " TEXT NOT NULL, "
             + FIRST    + " TEXT NOT NULL, "
             + LAST     + " TEXT NOT NULL);";

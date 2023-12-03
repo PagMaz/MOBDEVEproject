@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,7 +24,7 @@ import java.util.List;
 
 public class DiscussionRoom extends AppCompatActivity {
 
-    Button createPostButton, regionButton, positionButton, sortButton;
+    Button createPostButton, regionButton, positionButton, sortButton, searchButton;
     ImageButton menuButton;
     private DBManager2 dbManager;
 
@@ -31,12 +32,9 @@ public class DiscussionRoom extends AppCompatActivity {
 
     private SimpleCursorAdapter adapter;
     TextView usernameTextView, postTextView, regionTextView, positionTextView;
-
-//    List<String> allItems = Arrays.asList("America", "Europe", "Africa", "Asia");
-//
-//    List<String> filteredItems = new ArrayList<>(allItems);
-//
-//    ArrayAdapter<String> yourListAdapter;
+    String selectedRegion = "All";
+    String selectedPosition = "All";
+    EditText searchText;
 
     final String[] from = new String[] {
             DatabaseHelper2.USERNAME,
@@ -60,12 +58,17 @@ public class DiscussionRoom extends AppCompatActivity {
         createPostButton = (Button) findViewById(R.id.createPostButton);
         regionButton = (Button) findViewById(R.id.regionButton);
         positionButton = (Button) findViewById(R.id.positionButton);
+
         sortButton = (Button) findViewById(R.id.sortButton);
 
         menuButton = (ImageButton) findViewById(R.id.menuButton);
 
+        searchText = (EditText) findViewById(R.id.searchText);
+        searchButton = (Button) findViewById(R.id.searchButton);
+
         dbManager = new DBManager2(DiscussionRoom.this);
         dbManager.open();
+
         Cursor cursor = dbManager.fetch();
 
         listView = (ListView) findViewById(R.id.list_view);
@@ -148,6 +151,28 @@ public class DiscussionRoom extends AppCompatActivity {
                 showSortPopupMenu(view);
             }
         });
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String usernameToSearch = searchText.getText().toString();
+                searchListView(usernameToSearch);
+            }
+        });
+    }
+
+    private void updateListView(String selectedRegion, String selectedPosition) {
+        Cursor cursor;
+
+        if ("All".equals(selectedRegion) && "All".equals(selectedPosition)) {
+            cursor = dbManager.fetch(); // Fetch all data
+        } else if (!"All".equals(selectedRegion)){
+            cursor = dbManager.fetchByRegion(selectedRegion); // Fetch data based on selected region
+        } else {
+            cursor = dbManager.fetchByPosition(selectedPosition); // Fetch data based on selected position
+        }
+
+        adapter.changeCursor(cursor); // Update the cursor in the adapter
     }
 
     // Show Popup Menu for Region.
@@ -164,19 +189,29 @@ public class DiscussionRoom extends AppCompatActivity {
                 if (itemId == R.id.regionAll) {
                     // Handle option 1
                     regionButton.setText("All");
+                    selectedRegion = "All";
                 } else if (itemId == R.id.regionAmerica) {
                     // Handle option 2
                     regionButton.setText("America");
+                    selectedRegion = "America";
                 } else if (itemId == R.id.regionEurope) {
                     // Handle option 3
                     regionButton.setText("Europe");
+                    selectedRegion = "Europe";
                 } else if (itemId == R.id.regionAfrica) {
                     // Handle option 4
                     regionButton.setText("Africa");
+                    selectedRegion = "Africa";
                 } else if (itemId == R.id.regionAsia) {
                     // Handle option 5
                     regionButton.setText("Asia");
+                    selectedRegion = "Asia";
                 }
+
+                positionButton.setText("Position");
+                sortButton.setText("Sort");
+                selectedPosition = "All";
+                updateListView(selectedRegion, selectedPosition);
                 return true;
             }
         });
@@ -198,24 +233,47 @@ public class DiscussionRoom extends AppCompatActivity {
                 if (itemId == R.id.positionAll) {
                     // Handle option 1
                     positionButton.setText("All");
+                    selectedPosition = "All";
                 } else if (itemId == R.id.positionAttacker) {
                     // Handle option 1
                     positionButton.setText("Attacker");
+                    selectedPosition = "Attacker";
                 } else if (itemId == R.id.positionDefender) {
                     // Handle option 2
                     positionButton.setText("Defender");
+                    selectedPosition = "Defender";
                 } else if (itemId == R.id.positionSupport) {
                     // Handle option 3
                     positionButton.setText("Support");
+                    selectedPosition = "Support";
                 } else if (itemId == R.id.positionGoalkeeper) {
                     // Handle option 4
                     positionButton.setText("Goalkeeper");
+                    selectedPosition = "Goalkeeper";
                 }
+
+                regionButton.setText("Region");
+                sortButton.setText("Sort");
+                selectedRegion = "All";
+                updateListView(selectedRegion, selectedPosition);
                 return true;
             }
         });
 
         popupMenu.show();
+    }
+
+    void sortListView(boolean ascending) {
+        Cursor cursor;
+
+        if (ascending) {
+            // Sort all data by username
+            cursor = dbManager.fetchSortedByUsername("Ascending");
+        } else {
+            cursor = dbManager.fetchSortedByUsername("Descending");
+        }
+
+        adapter.changeCursor(cursor); // Update the cursor in the adapter
     }
 
     // Show Popup Menu for Sort.
@@ -232,16 +290,41 @@ public class DiscussionRoom extends AppCompatActivity {
                 if (itemId == R.id.sortAscend) {
                     // Handle option 1
                     sortButton.setText("Ascend");
+                    sortListView(true);
                 } else if (itemId == R.id.sortDescend) {
                     // Handle option 2
                     sortButton.setText("Descend");
+                    sortListView(false);
                 }
 
+                regionButton.setText("Region");
+                selectedRegion = "All";
+                positionButton.setText("Position");
+                selectedPosition = "All";
                 return true;
             }
         });
 
         popupMenu.show();
+    }
+
+    private void searchListView(String usernameToSearch) {
+        Cursor cursor;
+
+        if (usernameToSearch.isEmpty()) {
+            // If the search text is empty, show all data
+            updateListView(selectedRegion, selectedPosition);
+        } else {
+            // Fetch data by username
+            cursor = dbManager.fetchByUsername(usernameToSearch);
+            adapter.changeCursor(cursor);
+        }
+
+        regionButton.setText("Region");
+        selectedRegion = "All";
+        positionButton.setText("Position");
+        selectedPosition = "All";
+        sortButton.setText("Sort");
     }
 
     // Pass additional intent.

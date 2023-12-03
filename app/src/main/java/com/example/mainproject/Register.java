@@ -3,6 +3,7 @@ package com.example.mainproject;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -41,7 +42,9 @@ public class Register extends AppCompatActivity {
                 String first = firstName.getText().toString();
                 String last = lastName.getText().toString();
 
-                if (password.equals(verify)) {
+                if (dbManager.isUsernameExists(userName)) {
+                    Toast.makeText(Register.this, "Username already exists. Choose a different one.", Toast.LENGTH_SHORT).show();
+                } else if (password.equals(verify)) {
                     Toast.makeText(Register.this, "Register successful", Toast.LENGTH_SHORT).show();
                     dbManager.insert(userName, password, first, last);
                     Intent myIntent = new Intent(Register.this, Login.class)
@@ -53,5 +56,6 @@ public class Register extends AppCompatActivity {
             }
         });
     }
+
 
 }
